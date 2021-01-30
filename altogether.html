@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Sample DashBoard</title>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.6.0/d3.min.js"></script>
+  <script src="http://d3js.org/d3-scale-chromatic.v0.3.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css?family=Aldrich|Arima+Madurai|Arvo|Henny+Penny|Indie+Flower|Libre+Baskerville|Pirata+One|Poiret+One|Sancreek|Satisfy|Share+Tech+Mono|Smokum|Snowburst+One|Special+Elite"
+    rel="stylesheet">
+</head>
+
+<style>
+  /* set the CSS */
+
+  .bar:hover {
+    fill: rgba(34, 153, 173, 0.808);
+    opacity: 0.50
+  }
+
+  .arc text {
+    font: 13px sans-serif;
+    text-anchor: middle;
+  }
+
+  .arc path {
+    stroke: rgb(174, 174, 174);
+    stroke-width: 2px;
+  }
+
+  div.tooltip-donut {
+    position: absolute;
+    text-align: center;
+    padding: .3rem;
+    background: #FFFFFF;
+    color: #313639;
+    border: 1px solid #313639;
+    border-radius: 3px;
+    pointer-events: none;
+    font-size: 1.1rem;
+  }
+
+  div.tooltip-bar {
+    position: absolute;
+    text-align: center;
+    width: 60px;
+    height: 45px;
+    padding: 2px;
+    font: 13px 'Arvo';
+    background: rgb(255, 255, 255);
+    border: 1px solid #000000;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+	* {
+	  margin: 0;
+	  padding: 0;
+     }
+     body {
+	   font: 14px/1.4 Georgia, Serif;
+     }
+    #page-wrap {
+	  margin: 50px;
+    }
+    p {
+	 margin: 20px 0;
+    }
+
+	/*
+	Generic Styling, for Desktops/Laptops
+	*/
+	table {
+		width: 40%;
+    margin-left: 780px;
+    margin-top: -350px;
+		border-collapse: collapse;
+
+	}
+	/* Zebra striping */
+	tr:nth-of-type(odd) {
+		background: rgb(240, 240, 240);
+
+
+	}
+	th {
+		background: #157DEC;
+		color: white;
+		font-weight: bold;
+		cursor: s-resize;
+		background-repeat: no-repeat;
+        background-position: 3% center;
+
+	}
+	td, th {
+		padding: 6px;
+		border: 2px solid #ccc;
+		text-align: right;
+
+	}
+
+	th.des:after {
+      content: "\21E9";
+    }
+
+    th.aes:after {
+      content: "\21E7";
+    }
+
+	/*
+	Max width before this PARTICULAR table gets nasty
+	This query will take effect for any screen smaller than 760px
+	and also iPads specifically.
+	*/
+	@media
+	only screen and (max-width: 760px),
+	(min-device-width: 768px) and (max-device-width: 1024px)  {
+
+		/* Force table to not be like tables anymore */
+		table, thead, tbody, th, td, tr {
+			display: block;
+		}
+
+		/* Hide table headers (but not display: none;, for accessibility) */
+		thead tr {
+			position: absolute;
+			top: 500px;
+			left: 500px;
+		}
+
+		tr { border: 1px solid #ccc; }
+
+		td {
+			/* Behave  like a "row" */
+			border: none;
+			border-bottom: 1px solid #eee;
+			position: relative;
+			padding-left: 50%;
+		}
+
+		td:before {
+			/* Now like a table header */
+			position: absolute;
+			/* Top/left values mimic padding */
+			top: 6px;
+			left: 6px;
+			width: 45%;
+			padding-right: 10px;
+			white-space: nowrap;
+		}
+
+		/*
+		Label the data
+		*/
+		td:before {
+		  content: attr(data-th) ": ";
+          font-weight: bold;
+          width: 6.5em;
+          display: inline-block;
+		}
+	}
+
+	/* Smartphones (portrait and landscape) ----------- */
+	@media only screen
+	and (min-device-width : 320px)
+	and (max-device-width : 480px) {
+		body {
+			padding: 0;
+			margin: 0;
+			width: 320px;}
+		}
+
+	/* iPads (portrait and landscape) ----------- */
+	@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+		body {
+			width: 495px;
+		}
+	}
+</style>
+
+<body>
+  <div id="dash"></div>
+  <div id="page-wrap"></div>
+
+
+  <script>
+
+    var svg = d3.select("#dash").append("svg")
+      .attr("width", 1700)
+      .attr("height", 906);
+    
+    var widgetsData;
+    //d3.json('widget.json', function (error, data) {
+      d3.request('http://gbrdsm020003394:82/api/MailboxStats/139')
+      .get(function (data) {
+        //alert();
+        if(data == null)
+        {
+          widgetsData = JSON.parse('{"escalations":20,"chasers":29,"outstanding":1327,"newEmails":1327,"conversations":1327}');
+        }
+        else
+        {
+          widgetsData = JSON.parse(data.responseText); 
+        }
+        //alert(widgetsData['escalations']);
+
+      svg.append("a")
+        .attr("xlink:href", "table.html")
+        .append("rect")//blue rect
+        .attr("x", 20)
+        .attr("y", 60)
+        .attr("width", 300)
+        .attr("height", 120)
+        .attr("fill", "#509BB2")
+        .attr("rx", 10)
+        .attr("ry", 10);
+      svg.append("a") //red rect
+        .attr("xlink:href", "table.html")
+        .append("rect")
+        .attr("x", 350)
+        .attr("y", 60)
+        .attr("width", 300)
+        .attr("height", 120)
+        .attr("fill", "#B21E1E")
+        .attr("rx", 10)
+        .attr("ry", 10);
+      svg.append("a") //green rect
+        .attr("xlink:href", "table.html")
+        .append("rect")
+        .attr("x", 680)
+        .attr("y", 60)
+        .attr("width", 300)
+        .attr("height", 120)
+        .attr("fill", "#718066")
+        .attr("rx", 10)
+        .attr("ry", 10);
+      svg.append("a") //gray rect
+        .attr("xlink:href", "table.html")
+        .append("rect")
+        .attr("x", 1010)
+        .attr("y", 60)
+        .attr("width", 300)
+        .attr("height", 120)
+        .attr("fill", "#555853")
+        .attr("rx", 10)
+        .attr("ry", 10);
+      svg.append("a") //orange rect
+        .attr("xlink:href", "table.html")
+        .append("rect")
+        .attr("x", 1340)
+        .attr("y", 60)
+        .attr("width", 300)
+        .attr("height", 120)
+        .attr("fill", "#F09021")
+        .attr("rx", 10)
+        .attr("ry", 10);
+      svg.append("text") //Dashboard title
+        .attr("x", 75)
+        .attr("y", 35)
+        .attr("fill", "#3ACAEE")
+        .attr("font-family", function (d, i) { return i < 5 ? "Arvo" : "Sancreek"; })
+        .attr("font-size", 35)
+        .text("BOLT Dashboard");
+      svg.append("line") //top line
+        .attr("x1", 0)
+        .attr("x2", 1700)
+        .attr("y1", 45)
+        .attr("y2", 45)
+        .attr("stroke", "black")
+        .style("stroke-opacity", "0.1")
+        .style("stroke-width", "3");
+      svg.append("text") //escalation value
+        .attr("x", 153)
+        .attr("y", 115)
+        .attr("fill", "white")
+        .attr("font-family", "Arvo")
+        .attr("font-size", 25)
+        .style("pointer-events", "none")
+        .text(widgetsData['escalations']);
+      svg.append("text") //escalations
+        .attr("x", 120)
+        .attr("y", 140)
+        .attr("fill", "white")
+        .attr("font-size", 20)
+        .style("pointer-events", "none")
+        .text("Escalations");
+      svg.append("text") //chasers value
+        .attr("x", 490)
+        .attr("y", 115)
+        .attr("fill", "white")
+        .attr("font-family", "Arvo")
+        .attr("font-size", 25)
+        .style("pointer-events", "none")
+        .text(widgetsData['chasers']);
+      svg.append("text") //Chasers
+        .attr("x", 470)
+        .attr("y", 140)
+        .attr("fill", "white")
+        .attr("font-size", 20)
+        .style("pointer-events", "none")
+        .text("Chasers");
+      svg.append("text") //unactioned email value
+        .attr("x", 820)
+        .attr("y", 115)
+        .attr("fill", "white")
+        .attr("font-family", "Arvo")
+        .attr("font-size", 25)
+        .style("pointer-events", "none")
+        .text(widgetsData['outstanding']);
+      svg.append("text") //unactioned
+        .attr("x", 760)
+        .attr("y", 140)
+        .attr("fill", "white")
+        .attr("font-size", 20)
+        .style("pointer-events", "none")
+        .text("Unactioned Emails");
+      svg.append("text") //conversations value
+        .attr("x", 1140)
+        .attr("y", 115)
+        .attr("fill", "white")
+        .attr("font-family", "Arvo")
+        .attr("font-size", 25)
+        .style("pointer-events", "none")
+        .text(widgetsData['newEmails']);
+      svg.append("text") //conversations 
+        .attr("x", 1100)
+        .attr("y", 140)
+        .attr("fill", "white")
+        .attr("font-size", 20)
+        .style("pointer-events", "none")
+        .text("Conversations");
+      svg.append("text") //new emails value
+        .attr("x", 1480)
+        .attr("y", 115)
+        .attr("fill", "white")
+        .attr("font-family", "Arvo")
+        .attr("font-size", 25)
+        .style("pointer-events", "none")
+        .text(widgetsData['conversations']);
+      svg.append("text") //new emails
+        .attr("x", 1420)
+        .attr("y", 140)
+        .attr("fill", "white")
+        .attr("font-size", 20)
+        .style("pointer-events", "none")
+        .text("New Emails Today");
+      svg.append("text") //outstanding task by owner
+        .attr("x", 260)
+        .attr("y", 215)
+        .attr("fill", "black")
+        .attr("font-size", 21)
+        .text("Outstanding Tasks By Owner");
+      svg.append("line") //line below owner
+        .attr("x1", 260)
+        .attr("x2", 520)
+        .attr("y1", 225)
+        .attr("y2", 225)
+        .attr("stroke", "black")
+      svg.append("text") //by age
+        .attr("x", 840)
+        .attr("y", 215)
+        .attr("fill", "black")
+        .attr("font-size", 21)
+        .text("Outstanding Tasks By Age");
+      svg.append("line") //line below by age
+        .attr("x1", 840)
+        .attr("x2", 1075)
+        .attr("y1", 225)
+        .attr("y2", 225)
+        .attr("stroke", "black")
+      svg.append("text") //by client
+        .attr("x", 255)
+        .attr("y", 558)
+        .attr("fill", "black")
+        .attr("font-size", 21)
+        .text("Outstanding Tasks By Client");
+      svg.append("line") //line below client
+        .attr("x1", 255)
+        .attr("x2", 550)
+        .attr("y1", 568)
+        .attr("y2", 568)
+        .attr("stroke", "black")
+      svg.append("text") //by priority
+        .attr("x", 1280)
+        .attr("y", 215)
+        .attr("fill", "black")
+        .attr("font-size", 21)
+        .text("Outstanding Tasks By Priority");
+      svg.append("line") //line below priority
+        .attr("x1", 1280)
+        .attr("x2", 1550)
+        .attr("y1", 225)
+        .attr("y2", 225)
+        .attr("stroke", "black")
+      svg.append("text") //response time by assignment
+        .attr("x", 1030)
+        .attr("y", 580)
+        .attr("fill", "black")
+        .attr("font-size", 21)
+        .text("Response Time By Assignment");
+      svg.append("line") //line below priority
+        .attr("x1", 1030)
+        .attr("x2", 1315)
+        .attr("y1", 590)
+        .attr("y2", 590)
+        .attr("stroke", "black")
+
+
+      var div = d3.select("body").append("div")
+        .attr("class", "tooltip-bar")
+        .style("opacity", 0);
+
+      var div2 = d3.select("body").append("div")
+        .attr("class", "tooltip-donut")
+        .style("opacity", 0);
+
+      //Owner Chart-----------------------------------------------
+      // set the dimensions and margins of the graph
+      var margin = { top: 20, right: 20, bottom: 20, left: 20 },
+        width = 400 - margin.left - margin.right,
+        height = 300 - margin.top - margin.bottom;
+
+
+      // set the ranges
+      var x = d3.scaleBand()
+        .range([30, 650])
+        .padding(0.1);
+      var y = d3.scaleLinear()
+        .range([height, 0]);
+
+      // get the data
+      d3.csv("num.csv", function (error, data) {
+        if (error) throw error;
+
+        // format the data
+        data.forEach(function (d) {
+          d.num = +d.num;
+        });
+
+        function colorPicker2(n) {
+          if (n <= 5) {
+            return "#0E7C7B";
+          }
+          else if (n <= 10) {
+            return "#17BEBB";
+          }
+          else if (n <= 15) {
+            return "#D4F4DD";
+          }
+          else if (n <= 20) {
+            return "#D62246";
+          }
+          else {
+            return "#4B1D3F";
+          }
+
+        }
+
+        //Container for the gradients
+        var defs3 = svg.append("defs");
+
+        //Filter for the outside glow
+        var filter3 = defs3.append("filter")
+          .attr("id", "glow3");
+        filter3.append("feGaussianBlur")
+          .attr("stdDeviation", "1")
+          .attr("result", "coloredBlur");
+        var feMerge3 = filter3.append("feMerge");
+        feMerge3.append("feMergeNode")
+          .attr("in", "coloredBlur");
+        feMerge3.append("feMergeNode")
+          .attr("in", "SourceGraphic");
+
+        // Scale the range of the data in the domains
+        x.domain(data.map(function (d) { return d.owner; }));
+        y.domain([0, d3.max(data, function (d) { return d.num; })]);
+
+
+        // append the rectangles for the bar chart
+        svg.selectAll(".bar")
+          .data(data)
+          .enter().append("rect")
+          .attr("class", "bar")
+          .attr("transform", "translate(50,240)")
+          .attr("fill", function (d) { return colorPicker2(d.num); })
+          .attr('stroke', '#AEAEAE')
+          .attr('stroke-width', 2)
+          .attr("x", function (d) { return x(d.owner); })
+          .attr("width", x.bandwidth())
+          .attr("y", function (d) { return y(d.num); })
+          .attr("height", function (d) { return height - y(d.num); })
+          .on("mouseover", function (d) {
+            div.transition()
+              .duration(100)
+              .style("opacity", .9);
+            div.html(d.owner + "<br/>" + d.num)
+              .style("left", (d3.event.pageX) + "px")
+              .style("top", (d3.event.pageY - 28) + "px");
+          })
+          .on("mouseout", function (d) {
+            div.transition()
+              .duration(400)
+              .style("opacity", 0);
+          });
+
+
+
+        // add the x Axis
+        svg.append("g")
+          .attr("transform", "translate(50,500)")
+          .call(d3.axisBottom(x));
+
+        // add the y Axis
+        svg.append("g")
+          .attr("transform", "translate(80,240)")
+          .call(d3.axisLeft(y));
+
+        d3.selectAll(".bar")
+          .style("filter", "url(#glow3)");
+
+      });
+
+
+
+      //Madjanah's Pie------------------------------------------------------------
+
+      //setting up vars for the pie chart
+      var svg2 = d3.select("svg"),
+        width2 = +svg2.attr("width"),
+        height2 = +svg2.attr("height"),
+        radius = Math.min(width2, height2) / 5.5,
+        dountwid = 75;
+      g2 = svg2.append("g").attr("transform", "translate(" + 950 + "," + 395 + ")");
+
+      //new pie generator
+      var pie = d3.pie()
+        .sort(null)
+        .value(function (d) { return d.amount; });
+
+      var path = d3.arc()
+        .outerRadius(radius - 10)
+        .innerRadius(50)
+
+      var label = d3.arc()
+        .outerRadius(radius)
+        .innerRadius(50);
+
+      d3.csv("age.csv", function (d) {
+        d.amount = +d.amount;
+        return d;
+      }, function (error, data) {
+        if (error) throw error;
+
+        /*
+        function colorPicker2(n) {
+          if (n <= 3) {
+            return "#509BB2";
+          }
+          else if (n <= 5) {
+            return "#718066";
+          }
+          else if (n <= 5) {
+            return "#718066";
+          }
+          else if (n <= 5) {
+            return "#718066";
+          }
+          else if (n <= 5) {
+            return "#718066";
+          }
+          else {
+            return "#B21E1E";
+          }
+  
+        }
+        */
+        var colorPicker2 = d3.scaleOrdinal()
+          .range(["#A8C686", "#E7E34E", "#EABD3B", "#EE9A3A", "#DE542C", "#C02323"])
+
+        //Container for the gradients
+        var defs = svg2.append("defs");
+
+        //Filter for the outside glow
+        var filter = defs.append("filter")
+          .attr("id", "glow");
+        filter.append("feGaussianBlur")
+          .attr("stdDeviation", "1")
+          .attr("result", "coloredBlur");
+        var feMerge = filter.append("feMerge");
+        feMerge.append("feMergeNode")
+          .attr("in", "coloredBlur");
+        feMerge.append("feMergeNode")
+          .attr("in", "SourceGraphic");
+
+
+        var arc = g2.selectAll(".arc")
+          .data(pie(data))
+          .enter().append("g")
+          .attr("class", "arc")
+
+          //hovering
+          .on('mouseover', function (d, i) {
+            d3.select(this).transition()
+              .duration(200)
+              .attr('opacity', .65);
+            div2.transition()
+              .duration(200)
+              .style("opacity", 1);
+            let num = Math.round((d.data.amount)).toString();
+            div2.html(num)
+              .style("left", (d3.event.pageX + 20) + "px")
+              .style("top", (d3.event.pageY - 15) + "px");
+          })
+          .on('mouseout', function (d, i) {
+            d3.select(this).transition()
+              .duration(200)
+              .attr('opacity', 1);
+            div2.transition()
+              .duration(200)
+              .style("opacity", 0);
+          });
+
+
+        //text on the pie
+        arc.append("path")
+          .attr("d", path)
+          .attr("fill", function (d) { return colorPicker2(d.data.amount); });
+
+        arc.append("text")
+          .attr("transform", function (d) { return "translate(" + label.centroid(d) + ")"; })
+          .attr("dy", "0.35em")
+          .style('fill', '#211A1E')
+          .text(function (d) { return d.data.age; });
+
+        d3.selectAll("path")
+          .style("filter", "url(#glow)");
+      });
+
+      //Sean's Bar Chart---------------------------------------------------------
+
+      //makes box
+      var margin5 = { top: 15, right: 30, bottom: 40, left: 60 },
+        width5 = 600 - margin5.left - margin5.right,
+        height5 = 400 - margin5.top - margin5.bottom;
+
+
+
+
+      //puts data
+      d3.csv("seandata.csv", function (d) {
+        d.value = +d.value;
+        return d;
+      }, function (error, data) {
+        if (error) throw error;
+
+
+
+        //makes axes
+        //makes the x-axis
+        var height6 = 500 - margin5.top - margin5.bottom - 1.2;
+        var x5 = d3.scaleLinear()
+          .domain([0, d3.max(data, function (d, i) { return d.value; })])
+          .range([0, 550]);
+        svg.append("g")
+          .call(d3.axisBottom(x5))
+          .attr("transform", "translate(130," + 890 + ")")
+
+
+        //makes the y-axis
+        var y5 = d3.scaleBand()
+          .domain(d3.range(data.length))
+          .range([0, 300])
+          .padding(.23);
+
+        function yAxis(a) {
+          a.attr("transform", "translate(0,-20)")
+            .call(d3.axisLeft(y5).tickFormat(i => data[i].name))
+            .attr("font-size", '15px')
+        };
+
+        svg.append("g")
+          .call(yAxis)
+          .attr("transform", "translate(130," + 590 + ")");
+
+
+        //makes bars
+        //Makes alert color, if bigger than 60, then will show as red
+        function colorPicker(n) {
+          if (n < 40) { return "#BFC0C0"; }//good-green
+          if (n <= 60 & n >= 40) { return "#EF8354"; }//middle-yellow
+          else if (n > 60) { return "#4F5D75"; }//bad-red
+        };
+
+        var bars = svg.selectAll("bar")
+          .data(data)
+          .enter()
+          .append("g")
+          .attr("fill", function (d) {
+            return colorPicker(d.value);
+          })
+          .attr("font-size", "20")
+          .attr("color", "black")
+          .attr("transform", "translate(130,590)")
+          .on("mouseover", function (d) {
+            div.transition()
+              .duration(100)
+              .style("opacity", .9);
+            div.html(d.name + "<br/>" + d.value)
+              .style("left", (d3.event.pageX) + "px")
+              .style("top", (d3.event.pageY - 28) + "px");
+          })
+          .on("mouseout", function (d) {
+            div.transition()
+              .duration(400)
+              .style("opacity", 0);
+          });
+
+
+
+        //append rects
+        bars.append("rect")
+          .attr("class", "bar")
+          .attr("y", function (d, i) {
+            return i * 50;
+          })
+          .attr("height", 37)
+          .attr("x", 1)
+          .attr("width", function (d) {
+            return x5(d.value);
+          })
+          .attr('stroke', '#AEAEAE')
+          .attr('stroke-width', 2)
+
+
+
+        //makes labels
+        //add a value label to the right of each bar
+        bars.append("text")
+          .attr("class", ".text")
+          //y position of the label
+          .attr("y", function (d, i) {
+            return i * 50;
+          })
+          .attr("transform", "translate(0,25)")
+          //x position of the label
+          .attr("x", function (d) {
+            return x5(d.value) + 4;
+          })
+          .text(function (d) {
+            return d.value;
+          })
+          .style('fill', '#8F857D')
+          .style("font-family", "Franklin Gothic Medium")
+
+      });
+
+
+      //Priority Pie Chart----------------------------------------------------------
+
+      //setting up vars for the pie chart
+      var svg3 = d3.select("svg"),
+        width4 = +svg3.attr("width"),
+        height4 = +svg3.attr("height"),
+        radius4 = Math.min(width4, height4) / 5.4,
+        dountwid = 75;
+      g = svg3.append("g").attr("transform", "translate(" + 1410 + "," + 400 + ")");
+      //coloring the chart
+      function colorPicker4(n) {
+        if (n == "Critical") {
+          return "#EE2A2A";
+        }
+        else if (n == "High") {
+          return "#E46944";
+        }
+        else if (n == "Medium") {
+          return "#F09021";
+        }
+        else {
+          return "#A0C66F"
+        }
+
+      }
+
+
+
+      //new pie generator
+      var pie4 = d3.pie()
+        .sort(null)
+        .value(function (d) { return d.amount; });
+
+      var path4 = d3.arc()
+        .outerRadius(radius4 - 10)
+        .innerRadius(1)
+
+      var label4 = d3.arc()
+        .outerRadius(radius4)
+        .innerRadius(10);
+
+      //Container for the gradients
+      var defs6 = svg3.append("defs");
+
+      //Filter for the outside glow
+      var filter6 = defs6.append("filter")
+        .attr("id", "glow6");
+      filter6.append("feGaussianBlur")
+        .attr("stdDeviation", "1")
+        .attr("result", "coloredBlur");
+      var feMerge6 = filter6.append("feMerge");
+      feMerge6.append("feMergeNode")
+        .attr("in", "coloredBlur");
+      feMerge6.append("feMergeNode")
+        .attr("in", "SourceGraphic");
+
+      d3.csv("priority.csv", function (d) {
+        d.amount = +d.amount;
+        return d;
+      }, function (error, data) {
+        if (error) throw error;
+
+        var arc = g.selectAll(".arc")
+          .data(pie4(data))
+          .enter().append("g")
+          .attr("class", "arc")
+
+          //hovering
+          .on('mouseover', function (d, i) {
+            d3.select(this).transition()
+              .duration(200)
+              .attr('opacity', .65);
+            div2.transition()
+              .duration(200)
+              .style("opacity", 1);
+            let num = Math.round((d.data.amount)).toString();
+            div2.html(num)
+              .style("left", (d3.event.pageX + 20) + "px")
+              .style("top", (d3.event.pageY - 15) + "px");
+          })
+          .on('mouseout', function (d, i) {
+            d3.select(this).transition()
+              .duration(200)
+              .attr('opacity', 1);
+            div2.transition()
+              .duration(200)
+              .style("opacity", 0);
+          });
+
+        //text on the pie
+        arc.append("path")
+          .attr("d", path4)
+          .attr("fill", function (d) { return colorPicker4(d.data.priority); });
+
+        arc.append("text")
+          .attr("transform", function (d) { return "translate(" + label4.centroid(d) + ")"; })
+          .style('fill', '#211A1E')
+          .attr("dy", "0.35em")
+          .text(function (d) { return d.data.priority; });
+
+        d3.selectAll("path")
+          .style("filter", "url(#glow6)");
+
+      });
+
+//Alishah's table------------------------------------------------------------
+      d3.csv("alishahdata.csv", function(error, data) {
+		  if (error) throw error;
+
+		  var sortAscending = true;
+		  var table = d3.select('#page-wrap').append('table');
+		  var titles = d3.keys(data[0]);
+		  var headers = table.append('thead').append('tr')
+		                   .selectAll('th')
+		                   .data(titles).enter()
+		                   .append('th')
+		                   .text(function (d) {
+			                    return d;
+		                    })
+		                   .on('click', function (d) {
+		                	   headers.attr('class', 'header');
+
+		                	   if (sortAscending) {
+		                	     rows.sort(function(a, b) { return b[d] < a[d]; });
+		                	     sortAscending = false;
+		                	     this.className = 'aes';
+		                	   } else {
+		                		 rows.sort(function(a, b) { return b[d] > a[d]; });
+		                		 sortAscending = true;
+		                		 this.className = 'des';
+		                	   }
+
+		                   });
+
+		  var rows = table.append('tbody').selectAll('tr')
+		               .data(data).enter()
+                   .append('tr');
+		  rows.selectAll('td')
+		    .data(function (d) {
+		    	return titles.map(function (k) {
+		    		return { 'value': d[k], 'name': k};
+		    	});
+		    }).enter()
+		    .append('td')
+		    .attr('data-th', function (d) {
+		    	return d.name;
+        })
+		    .text(function (d) {
+		    	return d.value;
+		    });
+	  });
+    });
+  </script>
+
+</body>
+
+</html>
