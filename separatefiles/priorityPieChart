@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+    <style>
+
+        .arc text {
+          font: 13px sans-serif;
+          text-anchor: middle;
+        }
+
+        .arc path {
+          stroke: #fff;
+        }
+        div.tooltip-donut {
+             position: absolute;
+             text-align: center;
+             padding: .3rem;
+             background: #FFFFFF;
+             color: #313639;
+             border: 1px solid #313639;
+             border-radius: 3px;
+             pointer-events: none;
+             font-size: 1.1rem;
+        }
+    </style>
+<svg width="960" height="500"></svg>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.6.0/d3.min.js"></script>
+<script>
+
+    var div = d3.select ("body").append ("div")
+        .attr("class","tooltip-donut")
+        .style("opacity",0);
+
+//setting up vars for the pie chart
+      var svg3 = d3.select("svg"),
+          width = +svg3.attr("width"),
+          height = +svg3.attr("height"),
+          radius = Math.min(width, height) / 2,
+          dountwid= 75;
+          g = svg3.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+//coloring the chart
+      var color = d3.scaleOrdinal()
+      .range(["#CE4757", "#F29C66", "#E4BF64", "#87BEA2"])
+
+      //Container for the gradients
+      var defs = svg3.append("defs");
+
+      //Filter for the outside glow
+      var filter = defs.append("filter")
+          .attr("id","glow");
+      filter.append("feGaussianBlur")
+          .attr("stdDeviation","9.5")
+          .attr("result","coloredBlur");
+      var feMerge = filter.append("feMerge");
+      feMerge.append("feMergeNode")
+          .attr("in","coloredBlur");
+      feMerge.append("feMergeNode")
+          .attr("in","SourceGraphic");
+
+//new pie generator
+      var pie = d3.pie()
+          .sort(null)
+          .value(function(d) { return d.amount; });
+
+      var path = d3.arc()
+            .outerRadius(radius - 10)
+            .innerRadius(1)
+
+      var label = d3.arc()
+            .outerRadius(radius)
+            .innerRadius(10);
+
+      d3.csv("priority.csv", function(d) {
+        d.amount = +d.amount;
+        return d;
+      }, function(error, data) {
+        if (error) throw error;
+
+        var arc = g.selectAll(".arc")
+          .data(pie(data))
+          .enter().append("g")
+            .attr("class", "arc")
+//hovering
+
+.attr('transform', 'translate(0, 0)')
+.on('mouseover', function (d, i) {
+     d3.select(this).transition()
+          .duration('50')
+          .attr('opacity', '.85');
+          div.transition()
+          .duration(50)
+          .style("opacity", 1);
+     let num = Math.round((d.data.amount)).toString();
+     div.html(num)
+          .style("left", (d3.event.pageX + 20) + "px")
+          .style("top", (d3.event.pageY - 15) + "px");
+})
+.on('mouseout', function (d, i) {
+     d3.select(this).transition()
+          .duration('50')
+          .attr('opacity', '1');
+          div.transition()
+          .duration('50')
+          .style("opacity", 0);
+});
+
+//text on the pie
+        arc.append("path")
+            .attr("d", path)
+            .attr("fill", function(d) { return color(d.data.priority); });
+
+        arc.append("text")
+            .attr("transform", function(d) { return "translate(" + label.centroid(d) + ")"; })
+            .attr("dy", "0.35em")
+            .text(function(d) { return d.data.priority; });
+
+            d3.selectAll("path")
+          .style("filter", "url(#glow)");
+
+      });
+
+</script>
