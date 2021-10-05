@@ -1,9 +1,0 @@
-[   
-    { "Type": "Escalations",        "Num":"77"}, 
-    {"Type": "Chasers",             "Num":"20"}, 
-    {"Type": "Unactioned Email",    "Num":"30"},
-    {"Type": "Conversations",       "Num":"40"},
-    {"Type": "New Emails Today",    "Num":"50"}
-
-
-    ]
