@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <title>Client Bar chart</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.6.0/d3.min.js"></script>
+    <style>
+        .text {
+            font-size: 10;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            color: rgb(0, 0, 0);
+        }
+    </style>
+
+</head>
+
+<body>
+    <h1>Client Bar Chart</h1>
+    <div id="index1"></div>
+
+    <script>
+        
+       
+//------------------------------------MAKES THE BOX--------------------------
+        var margin5 = { top: 15, right: 30, bottom: 40, left: 70 },
+            width5 = 600 - margin5.left - margin5.right,
+            height5 = 400 - margin5.top - margin5.bottom;
+        var svg5 = d3.select("#index1").append("svg")
+            .attr("width", width5 + margin5.left + margin5.right)
+            .attr("height", height5 + margin5.top + margin5.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin5.left + "," + margin5.top + ")");
+//------------------------------------FINISHED----------------------------------------
+
+                
+
+//-----------------------------PUTS IN DATA--------------------
+        d3.csv("seandata.csv", function(d) {
+        d.value = +d.value;
+        return d;
+         }, function(error, data) {
+        if (error) throw error;
+//---------------------------FINISHED---------------------------
+            
+
+
+//------------------------------------MAKES THE AXES--------------------------------
+        //makes the x-axis
+        var height6 = 500 - margin5.top - margin5.bottom-1.2;
+        var x5 = d3.scaleLinear()
+                    .domain([0, d3.max(data, function(d,i){return d.value;})])     
+                    .range([0, width5]);
+        svg5.append("g")
+            .call(d3.axisBottom(x5))
+            .attr("transform", "translate(0," + height5+ ")")
+            
+            
+        //makes the y-axis
+        var y5 = d3.scaleBand()
+                     .domain(d3.range(data.length))
+                    .range([0,height5])
+                    .padding(.23);
+                   
+        function yAxis(a) {
+                a.attr("transform", `translate(0,-20`)
+                .call(d3.axisLeft(y5).tickFormat(i => data[i].name))
+                .attr("font-size", '15px')
+        };
+        
+        svg5.append("g").call(yAxis);
+//----------------------------------FINISHED--------------------------------------
+
+
+
+//------------------------------------MAKES THE BARS--------------------------------
+        //Makes alert color, if bigger than 60, then will show as red
+        function colorPicker(n) {
+            if(n<40)  { return "#87BEA2"; }//good-green
+            if(n<=60 & n>=40) { return "#E4BF64"; }//middle-yellow
+            else if(n>60) { return "#CE4757"; }//bad-red
+        };
+        
+        var bars = svg5.selectAll("bar")
+            .data(data)
+            .enter()
+            .append("g")
+            .attr("fill", function(d){
+                return colorPicker(d.value);
+            })
+            .attr("font-size", "20")
+            .attr("color", "black")
+            
+        //append rects
+        bars.append("rect")
+            .attr("class", "bar")
+            .attr("y", function (d,i) {
+                return i*57;
+            })
+            .attr("height", y5.bandwidth())
+            .attr("x", 1)
+            .attr("width", function (d) {
+                return x5(d.value);
+            })
+            .attr("transform", "translate(0,10)")
+
+        //Everything below makes the stuff highlight and such
+            .on('mouseover', function (d, i) {
+            d3.select(this).transition()
+          .duration('50')
+          .attr('opacity', '.85');
+          div.transition()
+          .duration(50)
+          .style("opacity", 1); 
+            })
+            .on('mouseout', function (d, i) {
+     d3.select(this).transition()
+          .duration('50')
+          .attr('opacity', '1');
+          div.transition()
+          .duration('50')
+          .style("opacity", 0);
+            })
+//----------------------------------FINISHED--------------------------------------
+
+
+
+//------------------------------------MAKES LABELS--------------------------------
+        //add a value label to the right of each bar
+        bars.append("text")
+            .attr("class", ".text")
+            //y position of the label
+            .attr("y", function (d,i) {
+                return i*57;
+            })
+            .attr("transform", "translate(0,38)")
+            //x position of the label
+            .attr("x", function (d) {
+                return x5(d.value) + 4;
+            })
+            .text(function (d) {
+                return d.value;
+            })
+            .style('fill', '#000')
+            .style("font-family", "Franklin Gothic Medium")
+        });
+//----------------------------------FINISHED--------------------------------------
+
+
+    </script>
+
+</body>
+
+</html>
