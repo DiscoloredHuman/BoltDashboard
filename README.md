@@ -1,6 +1,6 @@
 ## Bolt Dashboard
 
-A clean dashboard that presents data with adjustable charts. It can updates values of the charts in real time from a given file or API calls. Data visualization made easier. Must open in live server.
+A clean dashboard that presents data with adjustable charts. Similar to that of the Bolt email management application used in Barclays. It can updates values of the charts in real time from a given file or API calls. Data visualization made easier. Must open in live server.
 
 
 
