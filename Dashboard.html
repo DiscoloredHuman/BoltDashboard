@@ -643,7 +643,7 @@
 
 
       //puts data
-      d3.csv("seandata.csv", function (d) {
+      d3.csv("clientBarGraphData.csv", function (d) {
         d.value = +d.value;
         return d;
       }, function (error, data) {
@@ -857,7 +857,7 @@
       });
 
 
-      d3.csv("alishahdata.csv", function(error, data) {
+      d3.csv("responsetimeData.csv", function(error, data) {
 		  if (error) throw error;
 
 		  var sortAscending = true;
