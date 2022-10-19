@@ -429,7 +429,7 @@
         .range([height, 0]);
 
       // get the data
-      d3.csv("num.csv", function (error, data) {
+      d3.csv("ownerBarGraphData.csv", function (error, data) {
         if (error) throw error;
 
         // format the data
@@ -542,7 +542,7 @@
         .outerRadius(radius)
         .innerRadius(50);
 
-      d3.csv("age.csv", function (d) {
+      d3.csv("agePieChartData.csv", function (d) {
         d.amount = +d.amount;
         return d;
       }, function (error, data) {
@@ -807,7 +807,7 @@
       feMerge6.append("feMergeNode")
         .attr("in", "SourceGraphic");
 
-      d3.csv("priority.csv", function (d) {
+      d3.csv("priorityPieChartData.csv", function (d) {
         d.amount = +d.amount;
         return d;
       }, function (error, data) {
