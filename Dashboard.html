@@ -521,9 +521,6 @@
       });
 
 
-
-      //Madjanah's Pie------------------------------------------------------------
-
       //setting up vars for the pie chart
       var svg2 = d3.select("svg"),
         width2 = +svg2.attr("width"),
@@ -635,8 +632,7 @@
         d3.selectAll("path")
           .style("filter", "url(#glow)");
       });
-
-      //Sean's Bar Chart---------------------------------------------------------
+	      
 
       //makes box
       var margin5 = { top: 15, right: 30, bottom: 40, left: 60 },
@@ -860,7 +856,7 @@
 
       });
 
-//Alishah's table------------------------------------------------------------
+
       d3.csv("alishahdata.csv", function(error, data) {
 		  if (error) throw error;
 
